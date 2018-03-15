@@ -1,0 +1,52 @@
+.box__schedule {
+  border: thin solid gray;
+  border-top: medium solid blue;
+}
+.box__schedule h3 {
+  text-align: center;
+}
+.box__schedule h2 {
+  text-align: center;
+}
+.box__schedule_title {
+  width: 100%;
+  background-color: #A9D0F5;
+  position:relative;
+}
+.box__schedule_title:before {
+  content: "\2261";
+  padding-left: 10px;
+}
+.box__schedule_day {
+  padding: 10px;
+}
+.box__schedule_main {
+  width: 100%;
+}
+.box__schedule_view {
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
+}
+.box__schedule_view table {
+  border:none;
+}
+.box__schedule_view td,th {
+  border-bottom:solid 1px silver;
+}
+.daily {
+  background-color: gray;
+}
+.more {
+  display: inline-block;
+  padding: 5px 15px;
+  background-color: #3077be;
+  color: white;
+}
+.more i {
+  margin-left: 10px;
+}
+.fa-white:before {
+  color: white;
+}
