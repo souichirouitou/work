@@ -66,14 +66,12 @@ function changeSchedule($column,$dsn,$db,$name_count) {
           $pdo->query($query);
           $query = "insert into allSchedule values ('" .$column["id"]. "','" .$column["schedule"]. "','" .$value. "')";
           $pdo->query($query);
-          //header("Location: http://localhost/login_practice/Main.php");  // メイン画面へ遷移
         }
         else if($column["tab_id"] == 3) {
           $query = "insert into " .$value. " values ('" .$column["id"]. "','" .$column["startday_figure"]. "','" .$column["stopday_figure"]. "','" .$column["startday"]. "','" .$column["stopday"] . "','" .$column["starttime"]. "','" .$column["stoptime"]. "','" .$column["schedule"]. "','" .$column["memo"]. "','" .$column["tab_id"]. "','" .$column["repeat_terms"]. "','" .$column["terms_week"]. "','" .$column["terms_weekname"]. "','" .$column["terms_day"]. "')";
           $pdo->query($query);
           $query = "insert into allSchedule values ('" .$column["id"]. "','" .$column["schedule"]. "','" .$value. "')";
           $pdo->query($query);
-          //header("Location: http://localhost/login_practice/Main.php");  // メイン画面へ遷移
         }
       }
     }
@@ -101,7 +99,7 @@ function changeSchedule($column,$dsn,$db,$name_count) {
   } catch (PDOException $e) {
     $errorMessage = 'データベースエラー';
   }
-  header("Location: http://localhost/login_practice/Main.php");
+  header("Location: Main.php");
 }
 
 
