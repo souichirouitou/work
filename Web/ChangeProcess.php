@@ -192,10 +192,11 @@ if(isset($_POST["tab_id"])){
 
 /* 登録処理 */
 if($db_Flag == 1) {
-  $db['host'] = "localhost"; //DBサーバのURL
-  $db['user'] = "schedule"; // ユーザ名
-  $db['pass'] = "Schedule12()?A"; // 上記ユーザのパスワード
-  $db['dbname'] = "scheduleManagement"; // データベース名
+  /* スケジュール管理データベース */
+  $db['host'] = "***"; //DBサーバのURL
+  $db['user'] = "***"; // ユーザ名
+  $db['pass'] = "***"; // 上記ユーザのパスワード
+  $db['dbname'] = "***"; // データベース名
   $dsn = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
   changeSchedule($column,$dsn,$db,$name_count);
 }

@@ -7,10 +7,11 @@ if (!isset($_SESSION["NAME"])) {
   exit;
 } else {
   $username = $_SESSION["NAME"];
-  $db['host'] = "localhost"; //DBサーバのURL
-  $db['user'] = "schedule"; // ユーザ名
-  $db['pass'] = "Schedule12()?A"; // 上記ユーザのパスワード
-  $db['dbname'] = "scheduleManagement"; // データベース名
+  /* スケジュール管理データベース */
+  $db['host'] = "***"; //DBサーバのURL
+  $db['user'] = "***"; // ユーザ名
+  $db['pass'] = "***"; // 上記ユーザのパスワード
+  $db['dbname'] = "***"; // データベース名
   $dsn = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']); // 認証
   try {
     $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));

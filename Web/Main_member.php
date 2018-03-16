@@ -6,10 +6,11 @@ if (!isset($_SESSION["NAME"])) {
   header("Location: Logout.php");
   exit;
 } else {
-  $db['host'] = "localhost"; //DBサーバのURL
-  $db['user'] = "schedule"; // ユーザ名
-  $db['pass'] = "Schedule12()?A"; // 上記ユーザのパスワード
-  $db['dbname'] = "scheduleManagement"; // データベース名
+  /* スケジュール管理データベース */
+  $db['host'] = "***"; //DBサーバのURL
+  $db['user'] = "***"; // ユーザ名
+  $db['pass'] = "***"; // 上記ユーザのパスワード
+  $db['dbname'] = "***"; // データベース名
   $dsn = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
   try {
     $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
@@ -18,10 +19,11 @@ if (!isset($_SESSION["NAME"])) {
     echo $errorMessage;
   }
 
-  $db['host'] = "localhost"; //DBサーバのURL
-  $db['user'] = "login"; // ユーザ名
-  $db['pass'] = "Login12()?A"; // 上記ユーザのパスワード
-  $db['dbname'] = "loginManagement"; // データベース名
+  /* ログイン管理データベース */
+  $db['host'] = "***"; //DBサーバのURL
+  $db['user'] = "***"; // ユーザ名
+  $db['pass'] = "***"; // 上記ユーザのパスワード
+  $db['dbname'] = "***"; // データベース名
   $dsn2 = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
   try {
     $pdo2 = new PDO($dsn2, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
