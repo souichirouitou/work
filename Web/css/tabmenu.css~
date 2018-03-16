@@ -53,9 +53,7 @@ p.tabs a:hover {
 /* ▼ タブ中身のボックス */
 div.tab {
    /* ▼ ボックス共通の装飾 */
-   height: 100%;
-   clear: left;
-   margin-bottom: 15px;
+   height: 100%;  clear: left;
 }
 
 /* ▼ 各ボックスの配色設定 */

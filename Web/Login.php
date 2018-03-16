@@ -151,7 +151,7 @@ if (isset($_POST["signUp"])) {
 <head>
 <meta charset="utf-8">
   <link rel="stylesheet" type="text/css" href="css_2/message.css">
-  <link rel="stylesheet" type="text/css" href="css_2/tabmenu.css">
+  <link rel="stylesheet" type="text/css" href="css_2/login_tab.css">
   <link rel="stylesheet" type="text/css" href="css_2/schedule.css">
   <script src="js/function.js" language="JavaScript" type="text/javascript"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/3.4.1/css/swiper.min.css">

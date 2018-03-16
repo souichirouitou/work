@@ -7,7 +7,7 @@ div.tabbox {
   margin-top: 15px;
   padding: 0px;
   width: 100%;
-  height: 250px;
+  /*height: 95%;*/
 }
 /* ▼ タブ部分のマージンとパディング領域を設定 */
 p.tabs { margin: 0px; padding: 0px; }
@@ -52,7 +52,9 @@ p.tabs a:hover {
 /* ▼ タブ中身のボックス */
 div.tab {
    /* ▼ ボックス共通の装飾 */
-   height: 100%;  clear: left;
+   height: 100%;
+   clear: left;
+   margin-bottom: 15px;
 }
 
 /* ▼ 各ボックスの配色設定 */
