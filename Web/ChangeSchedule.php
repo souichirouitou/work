@@ -1,48 +1,26 @@
 <?php
-session_start();
-
 // ログイン状態チェック
+session_start();
 if (!isset($_SESSION["NAME"])) {
   header("Location: Logout.php");
-  exit;
+  exit();
 } else {
-  /* ログイン管理データベース */
-  $db['host'] = "***"; //DBサーバのURL
-  $db['user'] = "***"; // ユーザ名
-  $db['pass'] = "***"; // 上記ユーザのパスワード
-  $db['dbname'] = "***"; // データベース名
-  $dsn = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']); // 認証
-  try {
-    $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-    require_once ('escape.php');
-  } catch (PDOException $e) {
-    //header("Location: Logout.php");
-    echo "database error";
-    exit;
-  }
-
   $username = $_SESSION["NAME"];
-  /* スケジュール管理データベース */
-  $db['host'] = "***"; //DBサーバのURL
-  $db['user'] = "***"; // ユーザ名
-  $db['pass'] = "***"; // 上記ユーザのパスワード
-  $db['dbname'] = "***"; // データベース名
-  $dsn = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']); // 認証
-  try {
-    $pdo2 = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-  } catch (PDOException $e) {
-    //header("Location: Logout.php");
-    echo "database error";
-    exit;
-  }
+  require_once ('escape.php');
+  require_once ('database_info.php');
+  $username = $_SESSION["NAME"];
+  $dsn_schedule = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db_schedule['host'], $db_schedule['dbname']);
+  $dsn_login = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db_login['host'], $db_login['dbname']);
 }
- ?>
+?>
 
-  <?php
-  if(isset($_POST["id"])) {
+<?php
+if(isset($_POST["id"])) {
+  try {
     $id = $_POST["id"];
+    $pdo_schedule = new PDO($dsn_schedule, $db_schedule['user'], $db_schedule['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
     $query = "SELECT * from ".$username." where id = ?";
-    $stmt = $pdo2->prepare($query);
+    $stmt = $pdo_schedule->prepare($query);
     $stmt->execute(array($id));
     if($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       $startday = $row["startday"];
@@ -52,20 +30,32 @@ if (!isset($_SESSION["NAME"])) {
       $schedule = $row["schedule"];
       $memo = $row["memo"];
     } else {
-      echo "データベースエラー";
+      echo "他人の予定は変更できません";
+      exit();
     }
+  } catch(PDOException $e) {
+    header('Content-Type: text/plain; charset=UTF-8', true, 500);
+    exit($e->getMessage());
+  }
 
+  try {
+    $pdo_schedule = new PDO($dsn_schedule, $db_schedule['user'], $db_schedule['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
     $query = "SELECT member from allSchedule WHERE id = ?";
-    $stmt = $pdo2->prepare($query);
+    $stmt = $pdo_schedule->prepare($query);
     $stmt->execute(array($id));
     while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
       $member_name[] = $row["member"];
     }
-  } else {
-    echo "schedule error";
+  } catch(PDOException $e) {
+    header('Content-Type: text/plain; charset=UTF-8', true, 500);
+    exit($e->getMessage());
   }
-  $member_json = json_encode($member_name);
-  ?>
+} else {
+  echo "schedule error";
+  exit();
+}
+$member_json = json_encode($member_name);
+?>
 
 <!doctype html>
 <html>
@@ -78,13 +68,30 @@ if (!isset($_SESSION["NAME"])) {
   <link rel="stylesheet" type="text/css" href="css/main.css">
   <link rel="stylesheet" type="text/css" href="css/panmenu.css">
   <link rel="stylesheet" type="text/css" href="css/schedule.css">
+  <style type="text/css">
+  .link_button {
+    display       : inline-block;
+    font-size     : 5pt;        /* 文字サイズ */
+    text-align    : center;      /* 文字位置   */
+    cursor        : pointer;     /* カーソル   */
+    padding       : 16px 16px;   /* 余白       */
+    background    : #000066;     /* 背景色     */
+    color         : #ffffff;     /* 文字色     */
+    transition    : .3s;         /* なめらか変化 */
+    border        : 1px solid #000066;    /* 枠の指定 */
+  }
+  .link_button:hover{
+    box-shadow    : none;        /* カーソル時の影消去 */
+    color         : #000066;     /* 背景色     */
+    background    : #ffffff;     /* 文字色     */
+  }
+  </style>
   <script type="text/javascript">
   participateData = new Array();
   count = 0;
   function add() {
     var formData = $(".user").serializeArray();
     var flag = 1;
-
     formData.forEach(function(userData) {
       flag = 1;
       participateData.forEach(function(pData) {
@@ -106,7 +113,6 @@ if (!isset($_SESSION["NAME"])) {
     var formData = $(".participate").serializeArray();
     var index;
     var rmId;
-
     formData.forEach(function(userData) {
       index = participateData.indexOf(userData.value);
       participateData.splice(index,1);
@@ -122,10 +128,6 @@ if (!isset($_SESSION["NAME"])) {
       count++;
       $('.userInfo').append("<input type=\"hidden\" name=\"username[]\" value=\"" + userData + "\" />");
     });
-    //alert(count);
-    //$('#userInfo').append("<input type=\"button\" name=\"count\" value=\"" + count + "\" />");
-    //$('#participate').append("<option id=\"test\" value=\"test\">aaa</option>");
-    //alert(1);
     document.scheduleForm1.submit();
   }
   function send2() {
@@ -133,10 +135,6 @@ if (!isset($_SESSION["NAME"])) {
       count++;
       $('.userInfo').append("<input type=\"hidden\" name=\"username[]\" value=\"" + userData + "\" />");
     });
-    //alert(count);
-    //$('#userInfo').append("<input type=\"button\" name=\"count\" value=\"" + count + "\" />");
-    //$('#participate').append("<option id=\"test\" value=\"test\">aaa</option>");
-    //alert(1);
     document.scheduleForm2.submit();
   }
   function send3() {
@@ -144,10 +142,6 @@ if (!isset($_SESSION["NAME"])) {
       count++;
       $('.userInfo').append("<input type=\"hidden\" name=\"username[]\" value=\"" + userData + "\" />");
     });
-    //alert(count);
-    //$('#userInfo').append("<input type=\"button\" name=\"count\" value=\"" + count + "\" />");
-    //$('#participate').append("<option id=\"test\" value=\"test\">aaa</option>");
-    //alert(1);
     document.scheduleForm3.submit();
   }
   </script>
@@ -176,12 +170,12 @@ if (!isset($_SESSION["NAME"])) {
   <div class="message">
     <div class="image__item">
       <!--<a href="Main.php"><img src="image/message.png"></a>-->
-      <input type="button" onclick="location.href='Main.php'"value="マイページ" style="font-size: 2em;">
+      <input type="button" class="link_button" onclick="location.href='Main.php'"value="マイページ" />
     </div>
   </div>
   <div class="file">
     <div class="image__item">
-      <input type="button" onclick="location.href='Main_member.php'"value="全体スケジュール" style="font-size: 2em;">
+      <input type="button" class="link_button" onclick="location.href='Main_member.php'"value="全体スケジュール" />
       <!--<a href="Main.php"><img src="image/message.png"></a>-->
     </div>
   </div>
@@ -194,7 +188,7 @@ if (!isset($_SESSION["NAME"])) {
   </div>
 </div>
 
-<!-- タブメニュー実装 HTML文 -->
+<!-- タブメニュー実装 -->
 <div class="tabbox">
   <p class="tabs">
     <a href="#tab1" class="tab1" onclick="ChangeTab('tab1'); return false;">通常予定</a>
@@ -219,15 +213,21 @@ if (!isset($_SESSION["NAME"])) {
               <dd>
               <div class="user__Box">
               <div class="userSelect__Left">
-              <?php
-              $query = sprintf("select name from userData");
-              $stmt = $pdo->query($query);
-              print "<select name=\"user[]\" class=\"user\" multiple>";
-              while($result = $stmt->fetch(PDO::FETCH_ASSOC)){
-                  print "<option value=\"" .$result['name']. "\">" .$result['name']. "</option>";
-              }
-              print "</select>";
-              ?>
+                <?php
+                try {
+                  $pdo_login = new PDO($dsn_login, $db_login['user'], $db_login['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+                  $query = sprintf("select name from userData");
+                  $stmt = $pdo_login->query($query);
+                  print "<select name=\"user[]\" class=\"user\" multiple>";
+                  while($result = $stmt->fetch(PDO::FETCH_ASSOC)){
+                    print "<option value=\"" .$result['name']. "\">" .htmlspecialchars($result['name'], ENT_QUOTES, false). "</option>";
+                  }
+                  print "</select>";
+                } catch(PDOException $e) {
+                  header('Content-Type: text/plain; charset=UTF-8', true, 500);
+                  exit($e->getMessage());
+                }
+                ?>
               </div>
               <div class="userButton">
                 <input type="button" class="select_Button" onClick="add()" value="参加者の追加　→　" />
@@ -266,15 +266,21 @@ if (!isset($_SESSION["NAME"])) {
               <dd>
               <div class="user__Box">
               <div class="userSelect__Left">
-              <?php
-              $query = sprintf("select name from userData");
-              $stmt = $pdo->query($query);
-              print "<select name=\"user[]\" class=\"user\" multiple>";
-              while($result = $stmt->fetch(PDO::FETCH_ASSOC)){
-                  print "<option value=\"" .$result['name']. "\">" .$result['name']. "</option>";
-              }
-              print "</select>";
-              ?>
+                <?php
+                try {
+                  $pdo_login = new PDO($dsn_login, $db_login['user'], $db_login['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+                  $query = sprintf("select name from userData");
+                  $stmt = $pdo_login->query($query);
+                  print "<select name=\"user[]\" class=\"user\" multiple>";
+                  while($result = $stmt->fetch(PDO::FETCH_ASSOC)){
+                    print "<option value=\"" .$result['name']. "\">" .htmlspecialchars($result['name'], ENT_QUOTES, false). "</option>";
+                  }
+                  print "</select>";
+                } catch(PDOException $e) {
+                  header('Content-Type: text/plain; charset=UTF-8', true, 500);
+                  exit($e->getMessage());
+                }
+                ?>
               </div>
               <div class="userButton">
                 <input type="button" class="select_Button" onClick="add()" value="参加者の追加　→　" />
@@ -348,15 +354,21 @@ if (!isset($_SESSION["NAME"])) {
               <dd>
               <div class="user__Box">
               <div class="userSelect__Left">
-              <?php
-              $query = sprintf("select name from userData");
-              $stmt = $pdo->query($query);
-              print "<select name=\"user[]\" class=\"user\" multiple>";
-              while($result = $stmt->fetch(PDO::FETCH_ASSOC)){
-                  print "<option value=\"" .$result['name']. "\">" .$result['name']. "</option>";
-              }
-              print "</select>";
-              ?>
+                <?php
+                try {
+                  $pdo_login = new PDO($dsn_login, $db_login['user'], $db_login['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+                  $query = sprintf("select name from userData");
+                  $stmt = $pdo_login->query($query);
+                  print "<select name=\"user[]\" class=\"user\" multiple>";
+                  while($result = $stmt->fetch(PDO::FETCH_ASSOC)){
+                    print "<option value=\"" .$result['name']. "\">" .htmlspecialchars($result['name'], ENT_QUOTES, false). "</option>";
+                  }
+                  print "</select>";
+                } catch(PDOException $e) {
+                  header('Content-Type: text/plain; charset=UTF-8', true, 500);
+                  exit($e->getMessage());
+                }
+                ?>
               </div>
               <div class="userButton">
                 <input type="button" class="select_Button" onClick="add()" value="参加者の追加　→　" />

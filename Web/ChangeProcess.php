@@ -1,111 +1,6 @@
 <?php
-function get_figure($temp) {
-  $date_figure = "";
-  for($i=0,$count=0; $i < strlen($temp); $i++) {
-    if($temp[$i] != "-" && $count == 0) {
-      $date_figure .= $temp[$i];
-    } else if($temp[$i] != "-" && $count == 1) {
-      $date_figure .= $temp[$i];
-    } else if($temp[$i] != "-" && $count == 2) {
-      $date_figure .= $temp[$i];
-    } else if($temp[$i] == "-") {
-      $count++;
-    }
-  }
-  return intval($date_figure);
-}
-
-function changeSchedule($column,$dsn,$db,$name_count) {
-  try {
-    $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-    $query = "SELECT member from allSchedule WHERE id = ?";
-    $stmt = $pdo->prepare($query);
-    $stmt->execute(array($column["id"]));
-    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-      if(isset($row["member"])) {
-        $before_member[] = $row["member"];
-        $rmFlag[$row["member"]] = 1;
-      }
-    }
-  } catch (PDOException $e) {
-      $errorMessage = 'データベースエラー';
-  }
-
-  foreach ((array)$column["username"] as $value2) {
-    $addFlag[$value2] = 1;
-    foreach ($before_member as $value1) {
-        if($value1 == $value2) {
-          $rmFlag[$value1] = 0;
-          $addFlag[$value2] = 0;
-          //echo $value1." ".$value2."<br>";
-          break;
-        }
-      }
-    }
-
-  /* 削除 */
-  try {
-    foreach ((array)$before_member as $value) {
-      if($rmFlag[$value] == 1) {
-        $query = "DELETE FROM allSchedule WHERE member = ? AND id = ?";
-        //echo $query.$value."<br>";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute(array($value,$column["id"]));
-
-        $query = "DELETE FROM ".$value." WHERE id = ?";
-        $stmt = $pdo->prepare($query);
-        $stmt->execute(array($column["id"]));
-      }
-    }
-
-    /* 追加 */
-    foreach ((array)$column["username"] as $value) {
-      if($addFlag[$value] == 1) {
-        if($column["tab_id"] == 1 || $column["tab_id"] == 2) {
-          $query = "insert into " .$value. "(id,startday_figure,stopday_figure,startday,stopday,starttime,stoptime,schedule,memo,tab_id) values ('" .$column["id"]. "','" .$column["startday_figure"]. "','" .$column["stopday_figure"]. "','" .$column["startday"]. "','" .$column["stopday"] . "','" .$column["starttime"]. "','" .$column["stoptime"]. "','" .$column["schedule"]. "','" .$column["memo"]. "','" .$column["tab_id"]. "')";
-          $pdo->query($query);
-          $query = "insert into allSchedule values ('" .$column["id"]. "','" .$column["schedule"]. "','" .$value. "')";
-          $pdo->query($query);
-        }
-        else if($column["tab_id"] == 3) {
-          $query = "insert into " .$value. " values ('" .$column["id"]. "','" .$column["startday_figure"]. "','" .$column["stopday_figure"]. "','" .$column["startday"]. "','" .$column["stopday"] . "','" .$column["starttime"]. "','" .$column["stoptime"]. "','" .$column["schedule"]. "','" .$column["memo"]. "','" .$column["tab_id"]. "','" .$column["repeat_terms"]. "','" .$column["terms_week"]. "','" .$column["terms_weekname"]. "','" .$column["terms_day"]. "')";
-          $pdo->query($query);
-          $query = "insert into allSchedule values ('" .$column["id"]. "','" .$column["schedule"]. "','" .$value. "')";
-          $pdo->query($query);
-        }
-      }
-    }
-  }  catch (PDOException $e) {
-      $errorMessage = 'データベースエラー';
-  }
-
-
-  /* 更新 */
-  try {
-    foreach ((array)$before_member as $value) {
-      if($addFlag[$value]==0 && $rmFlag[$value]==0) {
-        if($column["tab_id"] == 1 || $column["tab_id"] == 2) {
-          $query = "UPDATE ".$value." SET startday_figure=? , stopday_figure=? , startday=? , stopday=? , starttime=? , stoptime=? , schedule=? , memo=? , tab_id=? , repeat_terms=? , terms_week=? , terms_weekname=? , terms_day=? WHERE id = ?";
-          $stmt = $pdo->prepare($query);
-          $stmt->execute(array($column["startday_figure"],$column["stopday_figure"],$column["startday"],$column["stopday"],$column["starttime"],$column["stoptime"],$column["schedule"],$column["memo"],$column["tab_id"],$column["repeat_terms"],$column["terms_week"],$column["terms_weekname"],$column["terms_day"],$column["id"]));
-        }
-        else if($column["tab_id"] == 3) {
-          $query = "UPDATE ".$value." SET startday_figure=? , stopday_figure=? , startday=? , stopday=? , starttime=? , stoptime=? , schedule=? , memo=? , tab_id=? , repeat_terms=? , terms_week=? , terms_weekname=? , terms_day=? WHERE id = ?";
-          $stmt = $pdo->prepare($query);
-          $stmt->execute(array($column["startday_figure"],$column["stopday_figure"],$column["startday"],$column["stopday"],$column["starttime"],$column["stoptime"],$column["schedule"],$column["memo"],$column["tab_id"],$column["repeat_terms"],$column["terms_week"],$column["terms_weekname"],$column["terms_day"],$column["id"]));
-        }
-      }
-    }
-  } catch (PDOException $e) {
-    $errorMessage = 'データベースエラー';
-  }
-  header("Location: Main.php");
-}
-
-
 require_once ('escape.php');
-$_POST = escape($_POST); // エスケープ処理
-$column = array();
+require_once ('database_info.php');
 $db_Flag = 1;
 if(isset($_POST["tab_id"])){
   $column["tab_id"] = $_POST["tab_id"];
@@ -184,18 +79,140 @@ if(isset($_POST["tab_id"])){
       $column["startday_figure"] = get_figure($column["startday"]);
       $column["stopday_figure"] = get_figure($column["stopday"]);
       $name_count = count($column["username"]);
-    } else echo "色々ない";
+    } else {
+       echo "色々ない";
+       exit();
+    }
   }
-} else echo "tab_idない";
+} else {
+  echo "tab_idない";
+  exit();
+}
 
-/* 登録処理 */
+/* 更新処理 */
 if($db_Flag == 1) {
-  /* スケジュール管理データベース */
-  $db['host'] = "***"; //DBサーバのURL
-  $db['user'] = "***"; // ユーザ名
-  $db['pass'] = "***"; // 上記ユーザのパスワード
-  $db['dbname'] = "***"; // データベース名
-  $dsn = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
-  changeSchedule($column,$dsn,$db,$name_count);
+  $dsn_schedule = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db_schedule['host'], $db_schedule['dbname']);
+  changeSchedule($column,$dsn_schedule,$db_schedule,$name_count);
+} else {
+  echo "error";
+  exit();
+}
+?>
+
+<?php
+function get_figure($temp) {
+  $date_figure = "";
+  for($i=0,$count=0; $i < strlen($temp); $i++) {
+    if($temp[$i] != "-" && $count == 0) {
+      $date_figure .= $temp[$i];
+    } else if($temp[$i] != "-" && $count == 1) {
+      $date_figure .= $temp[$i];
+    } else if($temp[$i] != "-" && $count == 2) {
+      $date_figure .= $temp[$i];
+    } else if($temp[$i] == "-") {
+      $count++;
+    }
+  }
+  return intval($date_figure);
+}
+
+function changeSchedule($column,$dsn_schedule,$db_schedule,$name_count) {
+  try {
+    $pdo_schedule = new PDO($dsn_schedule, $db_schedule['user'], $db_schedule['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+    $query = "SELECT member from allSchedule WHERE id = ?";
+    $stmt = $pdo_schedule->prepare($query);
+    $stmt->execute(array($column["id"]));
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      if(isset($row["member"])) {
+        $before_member[] = $row["member"];
+        $rmFlag[$row["member"]] = 1;
+      }
+    }
+  } catch(PDOException $e) {
+    header('Content-Type: text/plain; charset=UTF-8', true, 500);
+    exit($e->getMessage());
+  }
+  foreach ((array)$column["username"] as $value2) {
+    $addFlag[$value2] = 1;
+    foreach ($before_member as $value1) {
+        if($value1 == $value2) {
+          $rmFlag[$value1] = 0;
+          $addFlag[$value2] = 0;
+          break;
+        }
+      }
+    }
+
+  /* 削除 */
+  try {
+    foreach ((array)$before_member as $value) {
+      if($rmFlag[$value] == 1) {
+        $pdo_schedule = new PDO($dsn_schedule, $db_schedule['user'], $db_schedule['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+        $query = "DELETE FROM allSchedule WHERE member = ? AND id = ?";
+        $stmt = $pdo_schedule->prepare($query);
+        $stmt->execute(array($value,$column["id"]));
+
+        $value = $pdo_schedule->quote($value);
+        $value = ltrim($value, '\'');
+        $value = rtrim($value, '\'');
+        $query = "DELETE FROM ".$value." WHERE id = ?";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute(array($column["id"]));
+      }
+    }
+
+    /* 追加 */
+    foreach ((array)$column["username"] as $value) {
+      if($addFlag[$value] == 1) {
+        $pdo_schedule = new PDO($dsn_schedule, $db_schedule['user'], $db_schedule['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+        $value = $pdo_schedule->quote($value);
+        $value = ltrim($value, '\'');
+        $value = rtrim($value, '\'');
+        if($column["tab_id"] == 1 || $column["tab_id"] == 2) {
+          $query = "insert into " .$value. "(id,startday_figure,stopday_figure,startday,stopday,starttime,stoptime,schedule,memo,tab_id) values ('" .$column["id"]. "','" .$column["startday_figure"]. "','" .$column["stopday_figure"]. "','" .$column["startday"]. "','" .$column["stopday"] . "','" .$column["starttime"]. "','" .$column["stoptime"]. "','" .$column["schedule"]. "','" .$column["memo"]. "','" .$column["tab_id"]. "')";
+          $pdo_schedule->query($query);
+          $query = "insert into allSchedule values ('" .$column["id"]. "','" .$column["schedule"]. "','" .$value. "')";
+          $pdo_schedule->query($query);
+        }
+        else if($column["tab_id"] == 3) {
+          $query = "insert into " .$value. " values ('" .$column["id"]. "','" .$column["startday_figure"]. "','" .$column["stopday_figure"]. "','" .$column["startday"]. "','" .$column["stopday"] . "','" .$column["starttime"]. "','" .$column["stoptime"]. "','" .$column["schedule"]. "','" .$column["memo"]. "','" .$column["tab_id"]. "','" .$column["repeat_terms"]. "','" .$column["terms_week"]. "','" .$column["terms_weekname"]. "','" .$column["terms_day"]. "')";
+          $pdo_schedule->query($query);
+          $query = "insert into allSchedule values ('" .$column["id"]. "','" .$column["schedule"]. "','" .$value. "')";
+          $pdo_schedule->query($query);
+        }
+      }
+    }
+  } catch(PDOException $e) {
+    header('Content-Type: text/plain; charset=UTF-8', true, 500);
+    exit($e->getMessage());
+  }
+
+
+  /* 更新 */
+  try {
+    foreach ((array)$before_member as $value) {
+      if($addFlag[$value]==0 && $rmFlag[$value]==0) {
+        $pdo_schedule = new PDO($dsn_schedule, $db_schedule['user'], $db_schedule['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+        $value = $pdo_schedule->quote($value);
+        $value = ltrim($value, '\'');
+        $value = rtrim($value, '\'');
+        if($column["tab_id"] == 1 || $column["tab_id"] == 2) {
+          $query = "UPDATE ".$value." SET startday_figure=? , stopday_figure=? , startday=? , stopday=? , starttime=? , stoptime=? , schedule=? , memo=? , tab_id=? , repeat_terms=? , terms_week=? , terms_weekname=? , terms_day=? WHERE id = ?";
+          $stmt = $pdo_schedule->prepare($query);
+          $stmt->execute(array($column["startday_figure"],$column["stopday_figure"],$column["startday"],$column["stopday"],$column["starttime"],$column["stoptime"],$column["schedule"],$column["memo"],$column["tab_id"],$column["repeat_terms"],$column["terms_week"],$column["terms_weekname"],$column["terms_day"],$column["id"]));
+        }
+        else if($column["tab_id"] == 3) {
+          $query = "UPDATE ".$value." SET startday_figure=? , stopday_figure=? , startday=? , stopday=? , starttime=? , stoptime=? , schedule=? , memo=? , tab_id=? , repeat_terms=? , terms_week=? , terms_weekname=? , terms_day=? WHERE id = ?";
+          $stmt = $pdo->prepare($query);
+          $stmt->execute(array($column["startday_figure"],$column["stopday_figure"],$column["startday"],$column["stopday"],$column["starttime"],$column["stoptime"],$column["schedule"],$column["memo"],$column["tab_id"],$column["repeat_terms"],$column["terms_week"],$column["terms_weekname"],$column["terms_day"],$column["id"]));
+        }
+      }
+    }
+  } catch(PDOException $e) {
+    header('Content-Type: text/plain; charset=UTF-8', true, 500);
+    exit($e->getMessage());
+  }
+  header("Location: Main.php");
+  exit();
 }
 ?>

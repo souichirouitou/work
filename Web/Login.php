@@ -1,149 +1,114 @@
 <?php
+require_once ('escape.php');
+require_once ('database_info.php');
 require 'password_compat-master/lib/password.php';
-// セッション開始
 session_start();
+$dsn_schedule = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db_schedule['host'], $db_schedule['dbname']);
+$dsn_login = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db_login['host'], $db_login['dbname']);
+?>
 
-/* ログイン管理データベース */
-$db['host'] = "***"; //DBサーバのURL
-$db['user'] = "***"; // ユーザ名
-$db['pass'] = "***"; // 上記ユーザのパスワード
-$db['dbname'] = "***"; // データベース名
-
-// エラーメッセージの初期化
+<?php
 $loginErrorMessage = "";
 $singupErrorMessage = "";
 $singupMessage = "";
+?>
 
-
-// ログインボタンが押された場合
+<?php
+/* ログイン処理 */
 if (isset($_POST["login"])) {
-    // 1. ユーザIDの入力チェック
-    if (empty($_POST["userid"])) {  // emptyは値が空のとき
-        $loginErrorMessage = 'ユーザーIDが未入力です。';
-    } else if (empty($_POST["password"])) {
-        $loginErrorMessage = 'パスワードが未入力です。';
-    }
+  if (empty($_POST["userid"])) {
+    $loginErrorMessage = 'ユーザーIDが未入力です。';
+  } else if (empty($_POST["password"])) {
+    $loginErrorMessage = 'パスワードが未入力です。';
+  }
 
-    if (!empty($_POST["userid"]) && !empty($_POST["password"])) {
-        // 入力したユーザIDを格納
-        $userid = $_POST["userid"];
-
-        // 2. ユーザIDとパスワードが入力されていたら認証する
-        $dsn = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
-
-        // 3. エラー処理
-        try {
-            $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-
-            $stmt = $pdo->prepare('SELECT * FROM userData WHERE name=? or number=?');
-            $stmt->execute(array($userid, $userid));
-
-            $password = $_POST["password"];
-
-            if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                if (password_verify($password, $row['password'])) {
-                    session_regenerate_id(true);
-
-                    // 入力したIDのユーザー名を取得
-                    $id = $row['id'];
-                    $sql = "SELECT * FROM userData WHERE id = $id";  //入力したIDからユーザー名を取得
-                    $stmt = $pdo->query($sql);
-                    foreach ($stmt as $row) {
-                        $row['name'];  // ユーザー名
-                    }
-                    $_SESSION["NAME"] = $row['name'];
-
-                    header("Location: Main.php");  // メイン画面へ遷移
-                    exit();  // 処理終了
-                } else {
-                    // 認証失敗
-                    $loginErrorMessage = 'ユーザーIDあるいはパスワードに誤りがあります。1';
-                }
-            } else {
-                $loginErrorMessage = 'ユーザーIDあるいはパスワードに誤りがあります。2';
-            }
-        } catch (PDOException $e) {
-            $loginErrorMessage = 'データベースエラー';
+  if (!empty($_POST["userid"]) && !empty($_POST["password"])) {
+    try {
+      $password = $_POST["password"];
+      $userid = $_POST["userid"];
+      //$_POST = escape($_POST);
+      $pdo_login = new PDO($dsn_login, $db_login['user'], $db_login['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+      $stmt = $pdo_login->prepare('SELECT * FROM userData WHERE name=? or number=?');
+      $stmt->execute(array($userid, $userid));
+      if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        if (password_verify($password, $row['password'])) {
+          session_regenerate_id(true);
+          $id = $row['id'];
+          $sql = "SELECT * FROM userData WHERE id = ?";
+          $stmt = $pdo_login->prepare($sql);
+          $stmt->execute(array($id));
+          while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            if(isset($row["name"])) $_SESSION["NAME"] = $row['name'];
+          }
+          header("Location: Main.php");
+          exit();
+        } else {
+          $loginErrorMessage = 'ユーザーIDあるいはパスワードに誤りがあります。1';
         }
+      } else {
+        $loginErrorMessage = 'ユーザーIDあるいはパスワードに誤りがあります。2';
+      }
+    } catch(PDOException $e) {
+      header('Content-Type: text/plain; charset=UTF-8', true, 500);
+      exit($e->getMessage());
     }
+  }
 }
 
-
-// 登録ボタンが押された場合
+/* 登録処理 */
 if (isset($_POST["signUp"])) {
-    // 学籍番号,ユーザ名,パスワードの入力チェック
-    if (empty($_POST["studentnumber"])) {
-        $singupErrorMessage = '学籍番号が未入力です';
-    } else if (empty($_POST["username"])) {
-        $singupErrorMessage = 'ユーザーIDが未入力です';
-    } else if (empty($_POST["password3"])) {
-        $singupErrorMessage = 'パスワードが未入力です';
-    } else if (empty($_POST["password4"])) {
-        $singupErrorMessage = 'パスワードが未入力です';
-    }
+  if (empty($_POST["studentnumber"])) {
+      $singupErrorMessage = '学籍番号が未入力です';
+  } else if (empty($_POST["username"])) {
+      $singupErrorMessage = 'ユーザーIDが未入力です';
+  } else if (empty($_POST["password3"])) {
+      $singupErrorMessage = 'パスワードが未入力です';
+  } else if (empty($_POST["password4"])) {
+      $singupErrorMessage = 'パスワードが未入力です';
+  }
 
-    if (!empty($_POST["studentnumber"]) && !empty($_POST["username"]) && !empty($_POST["password3"]) && !empty($_POST["password4"]) && $_POST["password3"] === $_POST["password4"]) {
-        // 入力した学籍番号,ユーザID,パスワードを格納
-        $username = $_POST["username"];
-        $password = $_POST["password3"];
-        $studentnumber = $_POST["studentnumber"];
-
-        // 学籍番号,ユーザID,パスワードが入力されていたら認証する
-        $dsn = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
-
-        // 学籍番号チェック
-        try {
-            $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-            $stmt = $pdo->prepare('SELECT * FROM userData WHERE number = ?');
-            $stmt->execute(array($studentnumber));
-
-            if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                $stmt = $pdo->prepare("UPDATE userData set name=?,password=? where number=?");
-                $stmt->execute(array($username, password_hash($password, PASSWORD_DEFAULT), $studentnumber));
-                //$userid = $pdo->lastinsertid();  // 登録した(DB側でauto_incrementした)IDを$useridに入れる
-                $singupMessage = '登録が完了しました。あなたの登録名は '. $username. ' です。パスワードは '. $password. ' です。';  // ログイン時に使用するIDとパスワード
-
-                $stmt = $pdo->prepare('SELECT * FROM userData WHERE number = ?');
-                $stmt->execute(array($studentnumber));
-
-                if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                  $userid = $row['id'];
-                } else {
-                  echo "id取得失敗";
-                  $singupErrorMessage('ああああ');
-                }
-
-                // スケジュール管理用のテーブル作成
-                $db['host'] = "***"; //DBサーバのURL
-                $db['user'] = "***"; // ユーザ名
-                $db['pass'] = "***"; // 上記ユーザのパスワード
-                $db['dbname'] = "***"; // データベース名
-                $dsn2 = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
-                try {
-                  $pdo2 = new PDO($dsn2, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-                  $tablename = sprintf('%s',$username);
-                  $query = "create table " .$tablename. " select * from mihon";
-                  $pdo2->query($query);
-                  //create table qwert (id int, startday varchar(10), stopday varchar(10), starttime varchar(5), stoptime varchar(5), schedule varchar(100), memo varchar(400) );
-                  //create table a (id int, year varchar(4), month varchar(2), day varchar(2), hour varchar(2), starttime varchar(5), stoptime varchar(5), schedule varchar(100) );
-                  //create table qwert(id int, year int, month int, day int, hour int, starttime int, stoptime int, schedule varchar(100) );
-                } catch (PDOException $e) {
-                  $singupErrorMessage = 'データベースエラー2';
-                  // echo $e->getMessage();
-                }
-
-
-              } else {
-                // 該当データなし
-                $singupErrorMessage = '学籍番号に誤りがあります';
-            }
-        } catch (PDOException $e) {
-            $singupErrorMessage = 'データベースエラー';
-            // echo $e->getMessage();
+  if (isset($_POST["studentnumber"]) && isset($_POST["username"]) && isset($_POST["password3"]) && isset($_POST["password4"]) && $_POST["password3"] === $_POST["password4"]) {
+    $username = $_POST["username"];
+    $password = $_POST["password3"];
+    $studentnumber = $_POST["studentnumber"];
+    try {
+      $pdo_login = new PDO($dsn, $db_login['user'], $db_login['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+      $stmt = $pdo->prepare('SELECT * FROM userData WHERE number = ?');
+      $stmt->execute(array($studentnumber));
+      if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $stmt = $pdo->prepare("UPDATE userData set name=?,password=? where number=?");
+        $stmt->execute(array($username, password_hash($password, PASSWORD_DEFAULT), $studentnumber));
+        $singupMessage = '登録が完了しました。あなたの登録名は '.htmlspecialchars($username, ENT_QUOTES, false).' です。パスワードは '.htmlspecialchars($password, ENT_QUOTES, false).' です。';
+        $stmt = $pdo->prepare('SELECT * FROM userData WHERE number = ?');
+        $stmt->execute(array($studentnumber));
+        if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+          $userid = $row['id'];
+        } else {
+          $singupErrorMessage('ID取得失敗');
         }
-    } else if($_POST["password3"] != $_POST["password4"]) {
-        $singupErrorMessage = 'パスワードに誤りがあります。';
+
+        try {
+          $pdo_schedule = new PDO($dsn_schedule, $db_schedule['user'], $db_schedule['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+          $tablename = sprintf('%s',$username);
+          $tablename = $pdo_schedule->quote($tablename);
+          $tablename = ltrim($tablename, '\'');
+          $tablename = rtrim($tablename, '\'');
+          $query = "create table " .$tablename. " select * from mihon";
+          $pdo_schedule->query($query);
+        } catch(PDOException $e) {
+          header('Content-Type: text/plain; charset=UTF-8', true, 500);
+          exit($e->getMessage());
+        }
+      } else {
+        $singupErrorMessage = '学籍番号に誤りがあります';
+      }
+    } catch(PDOException $e) {
+      header('Content-Type: text/plain; charset=UTF-8', true, 500);
+      exit($e->getMessage());
     }
+  } else if($_POST["password3"] != $_POST["password4"]) {
+      $singupErrorMessage = 'パスワードに誤りがあります。';
+  }
 }
 ?>
 
@@ -179,8 +144,7 @@ if (isset($_POST["signUp"])) {
   </div>
 
   <div class="box__area3">
-    新規登録には、研究室に所属している学生の学生番号が必要です。<br>
-    研究室所属で登録できない場合、連絡してください。
+    研究室用
   </div>
 
   <div class="box__item">
@@ -235,24 +199,12 @@ if (isset($_POST["signUp"])) {
     </div>
 
     <div id="tab3" class="tab">
-      tab3
     </div>
-  </div><!-- tabbox -->
+  </div>
   </div>
 
-<!-- ページを開いた際の最初に表示されるタブの選択 -->
 <script type="text/javascript">
    ChangeTab('tab1');
 </script>
-
-
-<!--
-  <footer class="footer">
-    <div class="footer-inner">
-      <p>Copyright &copy; Network Service Lab</p>
-    </div>
-  </footer>
--->
-
 </body>
 </html>

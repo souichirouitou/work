@@ -1,80 +1,6 @@
 <?php
-function get_figure($temp) {
-  $date_figure = "";
-  for($i=0,$count=0; $i < strlen($temp); $i++) {
-    if($temp[$i] != "-" && $count == 0) {
-      $date_figure .= $temp[$i];
-    } else if($temp[$i] != "-" && $count == 1) {
-      $date_figure .= $temp[$i];
-    } else if($temp[$i] != "-" && $count == 2) {
-      $date_figure .= $temp[$i];
-    } else if($temp[$i] == "-") {
-      $count++;
-    }
-  }
-  return intval($date_figure);
-}
-
-/* 通常・連日予定処理 */
-function addSchedule($column,$dsn,$db,$name_count) {
-  if($column["tab_id"] == 1 || $column["tab_id"] == 2) {
-    try {
-      $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-      $query = "SELECT MAX(id) as max from allSchedule";
-      $stmt = $pdo->query($query);
-      if($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        if(isset($row["max"])) {
-          $max = $row["max"];
-        } else {
-          $max = 0;
-        }
-      } else {
-        echo "データベースエラー";
-      }
-      for($i=0; $i<$name_count; $i++) {
-        $tablename = sprintf('%s',$column["username"][$i]);
-        $query = "insert into " .$tablename. "(id,startday_figure,stopday_figure,startday,stopday,starttime,stoptime,schedule,memo,tab_id) values ('" .($max+1). "','" .$column["startday_figure"]. "','" .$column["stopday_figure"]. "','" .$column["startday"]. "','" .$column["stopday"] . "','" .$column["starttime"]. "','" .$column["stoptime"]. "','" .$column["schedule"]. "','" .$column["memo"]. "','" .$column["tab_id"]. "')";
-        $pdo->query($query);
-
-        $query = "insert into allSchedule values ('" .($max+1). "','" .$column["schedule"]. "','" .$tablename. "')";
-        $pdo->query($query);
-      }
-      header("Location: Main.php");  // メイン画面へ遷移
-    } catch (PDOException $e) {
-        $errorMessage = 'データベースエラー';
-    }
-  }
-  else if($column["tab_id"] == 3) {
-    try {
-      $pdo = new PDO($dsn, $db['user'], $db['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
-      $query = "SELECT MAX(id) as max from allSchedule";
-      $stmt = $pdo->query($query);
-      if($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        if(isset($row["max"])) {
-          $max = $row["max"];
-        } else {
-          $max = 0;
-        }
-      } else {
-        echo "データベースエラー";
-      }
-      for($i=0; $i<$name_count; $i++) {
-        $tablename = sprintf('%s',$column["username"][$i]);
-        $query = "insert into " .$tablename. " values ('" .($max+1). "','" .$column["startday_figure"]. "','" .$column["stopday_figure"]. "','" .$column["startday"]. "','" .$column["stopday"] . "','" .$column["starttime"]. "','" .$column["stoptime"]. "','" .$column["schedule"]. "','" .$column["memo"]. "','" .$column["tab_id"]. "','" .$column["repeat_terms"]. "','" .$column["terms_week"]. "','" .$column["terms_weekname"]. "','" .$column["terms_day"]. "')";
-        $pdo->query($query);
-        $query = "insert into allSchedule values ('" .($max+1). "','" .$column["schedule"]. "','" .$tablename. "')";
-        $pdo->query($query);
-      }
-      header("Location: Main.php");  // メイン画面へ遷移
-    } catch (PDOException $e) {
-        $errorMessage = 'データベースエラー';
-    }
-  }
-}
-
 require_once ('escape.php');
-$_POST = escape($_POST); // エスケープ処理
-$column = array();
+require_once ('database_info.php');
 $db_Flag = 1;
 if(isset($_POST["tab_id"])){
   $column["tab_id"] = $_POST["tab_id"];
@@ -143,18 +69,109 @@ if(isset($_POST["tab_id"])){
       $column["startday_figure"] = get_figure($column["startday"]);
       $column["stopday_figure"] = get_figure($column["stopday"]);
       $name_count = count($column["username"]);
-    } else echo "色々ない";
+    } else {
+       echo "色々ない";
+       exit();
+    }
   }
-} else echo "tab_idない";
+} else {
+  echo "tab_idない";
+  exit();
+}
 
 /* 登録処理 */
 if($db_Flag == 1) {
-  /* スケジュール管理データベース */
-  $db['host'] = "***"; //DBサーバのURL
-  $db['user'] = "***"; // ユーザ名
-  $db['pass'] = "***"; // 上記ユーザのパスワード
-  $db['dbname'] = "***"; // データベース名
-  $dsn = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db['host'], $db['dbname']);
-  addSchedule($column,$dsn,$db,$name_count);
+  $dsn_schedule = sprintf('mysql: host=%s; dbname=%s; charset=utf8', $db_schedule['host'], $db_schedule['dbname']);
+  addSchedule($column,$dsn_schedule,$db_schedule,$name_count);
+}
+?>
+
+
+<?php
+function get_figure($temp) {
+  $date_figure = "";
+  for($i=0,$count=0; $i < strlen($temp); $i++) {
+    if($temp[$i] != "-" && $count == 0) {
+      $date_figure .= $temp[$i];
+    } else if($temp[$i] != "-" && $count == 1) {
+      $date_figure .= $temp[$i];
+    } else if($temp[$i] != "-" && $count == 2) {
+      $date_figure .= $temp[$i];
+    } else if($temp[$i] == "-") {
+      $count++;
+    }
+  }
+  return intval($date_figure);
+}
+
+/* 通常・連日予定処理 */
+function addSchedule($column,$dsn_schedule,$db_schedule,$name_count) {
+  if($column["tab_id"] == 1 || $column["tab_id"] == 2) {
+    try {
+      $pdo_schedule = new PDO($dsn_schedule, $db_schedule['user'], $db_schedule['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+      $query = "SELECT MAX(id) as max from allSchedule";
+      $stmt = $pdo_schedule->query($query);
+      if($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        if(isset($row["max"])) {
+          $max = $row["max"];
+        } else {
+          $max = 0;
+        }
+      } else {
+        echo "データベースエラー";
+        exit();
+      }
+
+      for($i=0; $i<$name_count; $i++) {
+        $tablename = sprintf('%s',$column["username"][$i]);
+        $tablename = $pdo_schedule->quote($tablename);
+        $tablename = ltrim($tablename, '\'');
+        $tablename = rtrim($tablename, '\'');
+        $query = "insert into " .$tablename. "(id,startday_figure,stopday_figure,startday,stopday,starttime,stoptime,schedule,memo,tab_id) values ('" .($max+1). "','" .$column["startday_figure"]. "','" .$column["stopday_figure"]. "','" .$column["startday"]. "','" .$column["stopday"] . "','" .$column["starttime"]. "','" .$column["stoptime"]. "','" .$column["schedule"]. "','" .$column["memo"]. "','" .$column["tab_id"]. "')";
+        $pdo_schedule->query($query);
+
+        $query = "insert into allSchedule values ('" .($max+1). "','" .$column["schedule"]. "','" .$tablename. "')";
+        $pdo_schedule->query($query);
+      }
+      header("Location: Main.php");  // メイン画面へ遷移
+      exit();
+    } catch(PDOException $e) {
+      header('Content-Type: text/plain; charset=UTF-8', true, 500);
+      exit($e->getMessage());
+    }
+  }
+
+  else if($column["tab_id"] == 3) {
+    try {
+      $pdo_schedule = new PDO($dsn_schedule, $db_schedule['user'], $db_schedule['pass'], array(PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION));
+      $query = "SELECT MAX(id) as max from allSchedule";
+      $stmt = $pdo_schedule->query($query);
+      if($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        if(isset($row["max"])) {
+          $max = $row["max"];
+        } else {
+          $max = 0;
+        }
+      } else {
+        echo "データベースエラー";
+        exit();
+      }
+      for($i=0; $i<$name_count; $i++) {
+        $tablename = sprintf('%s',$column["username"][$i]);
+        $tablename = $pdo_schedule->quote($tablename);
+        $tablename = ltrim($tablename, '\'');
+        $tablename = rtrim($tablename, '\'');
+        $query = "insert into " .$tablename. " values ('" .($max+1). "','" .$column["startday_figure"]. "','" .$column["stopday_figure"]. "','" .$column["startday"]. "','" .$column["stopday"] . "','" .$column["starttime"]. "','" .$column["stoptime"]. "','" .$column["schedule"]. "','" .$column["memo"]. "','" .$column["tab_id"]. "','" .$column["repeat_terms"]. "','" .$column["terms_week"]. "','" .$column["terms_weekname"]. "','" .$column["terms_day"]. "')";
+        $pdo_schedule->query($query);
+        $query = "insert into allSchedule values ('" .($max+1). "','" .$column["schedule"]. "','" .$tablename. "')";
+        $pdo_schedule->query($query);
+      }
+      header("Location: Main.php");  // メイン画面へ遷移
+      exit();
+    } catch(PDOException $e) {
+      header('Content-Type: text/plain; charset=UTF-8', true, 500);
+      exit($e->getMessage());
+    }
+  }
 }
 ?>
