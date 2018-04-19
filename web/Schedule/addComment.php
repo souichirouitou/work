@@ -11,6 +11,7 @@ if (!isset($_SESSION["NAME"])) {
 }
 ?>
 
+
 <?php
 if(isset($_POST["schedule_id"]) && $_POST["comment_text"] && $_POST["schedule_date"]) {
   $comment["schedule_id"] = $_POST["schedule_id"];
