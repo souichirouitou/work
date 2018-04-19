@@ -1,0 +1,503 @@
+html {
+}
+body {
+  font-family: 游ゴシック体, 'Yu Gothic', YuGothic, 'ヒラギノ角ゴシック Pro', 'Hiragino Kaku Gothic Pro', メイリオ, Meiryo, Osaka, 'ＭＳ Ｐゴシック', 'MS PGothic', sans-serif;
+  background-image: url(../image/sos.png);
+}
+.footer {
+  background-color: #dddddd;
+  height: 30px;
+  width: 100%;
+  bottom: 0;
+  padding-top: 15px;
+  padding-bottom: 1px;
+  padding-left: 10px;
+  padding-right: 0px;
+}
+.footer-inner p {
+  margin-top: auto;
+  color: #666666;
+  font-size: 14px;
+}
+
+.box__area {
+  width: 100%;
+  height: 30%;
+}
+.box__area {
+  position: relative;
+  top: 0px;
+  background-color: gray;
+}
+.box__area2 {
+  width: 75%;
+  height: 80px;
+  margin: auto;
+}
+.box__area2 h1 {
+  font-size: 60px;
+  font-style: oblique;
+  font-family: cursive;
+  font-weight: 600;
+  text-align: left;
+  letter-spacing: 5px;
+  color: #6E6E6E;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  /*border-left: solid 5px #c50018;
+  border-bottom: solid 2px gray;*/
+  text-shadow: 6px 6px 10px silver;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 1px 0 rgba(255,255,255,1);
+}
+.box__item {
+  width: 75%;
+  height: 55px;
+  margin: auto;
+  margin-top: 40px;
+}
+.box__item h2 {
+  font-size: 30px;
+  font-weight: 600;
+  text-align: left;
+  letter-spacing: 5px;
+  color: #A4A4A4;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  /*border-left: solid 5px #c50018;
+  border-bottom: solid 2px gray;*/
+  text-shadow: 6px 6px 10px silver;
+  border-left: 5px solid rgba(0,0,0,0.1);
+}
+.box__area3 {
+  width: 71%;
+  /*height: 60%;*/
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 15px;
+  background-color: white;
+  font-size: 18px;
+  letter-spacing: 0.8pt;
+  line-height: 2.0em;
+  padding-top: 30px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+  color: #585858;
+}
+.box__area3 h3 {
+  font-size: 25px;
+}
+.box__area4 {
+  width: 71%;
+  /*height: 60%;*/
+  margin-right: auto;
+  margin-left: auto;
+  margin-top: 15px;
+  margin-bottom: 30px;
+  background-color: white;
+  font-size: 18px;
+  letter-spacing: 0.8pt;
+  line-height: 2.0em;
+  padding-top: 30px;
+  padding-left: 30px;
+  padding-right: 30px;
+  padding-bottom: 30px;
+  color: #585858;
+}
+.box__area4 h3 {
+  font-size: 25px;
+}
+
+/** reserch thema 検索ボックス **/
+.select__thema {
+  width: 75%;
+  height: 60px;
+  margin-top: 20px;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 20px;
+  letter-spacing: 0.8pt;
+  text-align: center;
+  color: #585858;
+}
+.select__thema:after {
+  content: "";
+  display: block;
+  clear: both
+}
+.select__lab_ALL {
+  float: left;
+  width: 23%;
+  height: 60px;
+  margin: 1%;
+  background-color: gray;
+}
+.select__lab_nishizono{
+  float: left;
+  width: 23%;
+  height: 60px;
+  margin: 1%;
+  background-color: gray;
+}
+.select__lab_ooyama{
+  float: left;
+  width: 23%;
+  height: 60px;
+  margin: 1%;
+  background-color: gray;
+}
+.select__lab_mikoshi {
+  float: left;
+  width: 23%;
+  height: 60px;
+  margin: 1%;
+  background-color: gray;
+}
+.select__lab_all:hover {
+  background-color: black;
+}
+.select__lab_nishizono:hover{
+  background-color: black;
+}
+.select__lab_ooyama:hover{
+  background-color: black;
+}
+.select__lab_mikoshi:hover {
+  background-color: black;
+}
+
+
+
+/** research画像 ボックス **/
+.research__image {
+  width: 75%;
+  /*height: 200px;*/
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: auto;
+  margin-left: auto;
+  font-size: 20px;
+  letter-spacing: 0.8pt;
+  text-align: center;
+  color: #585858;
+}
+.research__image:after {
+  content: "";
+  display: block;
+  clear: both
+}
+/*
+.research__nishizono > a{
+  width:23%;
+  height:100%;
+}
+*/
+.research__nishizono img{
+  width:100%;
+  height:100%;
+  clear: both;
+}
+.research__ooyama > img{
+  width:100%;
+  height:100%;
+  clear: both;
+}
+.research__mikoshi > img{
+  width:100%;
+  height:100%;
+  clear: both;
+}
+.research__nishizono {
+  float: left;
+  width: 23%;
+  height: 200px;
+  margin: 1%;
+  overflow: auto;
+}
+.research__ooyama {
+  float: left;
+  width: 23%;
+  height: 200px;
+  margin: 1%;
+  overflow: auto;
+}
+.research__mikoshi {
+  float: left;
+  width: 23%;
+  height: 200px;
+  margin: 1%;
+  overflow: auto;
+}
+
+
+
+
+
+.box_image {
+width: 100%;
+height: 100%;
+z-index: 0;
+background-color: gray
+}
+
+.box__logo {
+  position: absolute;
+  width: 25%;
+  height: 50px;
+  top: 0;
+  left: 0;
+}
+
+.box__logo h1 {
+  font-size: 20px;
+  font-style: oblique;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 3px;
+  color: white;
+}
+
+
+
+/** メニュー関係 **/
+.box_top {
+  width: 100%;
+  height: 50px;
+  z-index: 2;
+}
+
+.box_top:after {
+  content: "";
+  display: block;
+  clear: both
+}
+
+.box_top {
+  position: absolute;
+  top: 0px;
+}
+
+.box__empty_left {
+  float: left;
+  width: 25%;
+  height: 100%;
+  filter:alpha(opacity=50);
+  -moz-opacity: 0.5;
+  opacity: 0.5;
+}
+.box__empty_right {
+  float: left;
+  width: 25%;
+  height: 100%;
+  filter:alpha(opacity=50);
+  -moz-opacity: 0.5;
+  opacity: 0.5;
+
+}
+
+.box_menu {
+  float: left;
+  width: 50%;
+  height: 100%;
+  background-color: gray;
+  filter:alpha(opacity=50);
+  -moz-opacity: 0.5;
+  opacity: 0.5;
+  border-bottom: groove 5px #dddddd
+}
+
+.box_menu ul {
+  margin: 0;
+  padding: 0;
+  list-style: none
+}
+
+.box_menu li a {
+  display: block;
+  padding: 15px;
+  color: #000000;
+  font-size: 14px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.box_menu li a:hover {
+  background-color: #eeeeee
+}
+
+.box_menu ul:after {
+  content: "";
+  display: block;
+  clear: both
+}
+
+.box_menu li {
+  float: left;
+  width: 20%;
+  margin: 0;
+  padding :0;
+  list-style: none;
+}
+
+
+/** メガメニュー **/
+.menu {
+    position: relative;
+    width: 100%;
+    height:50;
+    max-width: 1000px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.menu > li {
+    float: left;
+    width: 25%; /* グローバルナビ4つの場合 */
+    height: 50px;
+    line-height: 50px;
+    margin :0;
+    background: rgb(29, 33, 19);
+}
+
+.menu > li a {
+    display: block;
+    color: #fff;
+}
+
+.menu > li a:hover {
+    color: #999;
+}
+
+ul.menu__second-level {
+    visibility: hidden;
+    opacity: 0;
+    z-index: 1;
+}
+
+ul.menu__third-level {
+    visibility: hidden;
+    opacity: 0;
+}
+
+ul.menu__fourth-level {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.menu > li:hover {
+    background: #072A24;
+    -webkit-transition: all .5s;
+    transition: all .5s;
+}
+
+.menu__second-level li {
+    border-top: 1px solid #111;
+    /*border-bottom: 100px solid rgba(0,0,0,0.1);*/
+}
+
+.menu__third-level li {
+    border-top: 1px solid #111;
+}
+
+.menu__second-level li a:hover {
+    background: #111;
+}
+
+.menu__third-level li a:hover {
+    background: #2a1f1f;
+}
+
+.menu__fourth-level li a:hover {
+    background: #1d0f0f;
+}
+
+/* 下矢印 */
+.init-bottom:after {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin: 0 0 0 15px;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+/* floatクリア */
+.menu:before,
+.menu:after {
+    content: '';
+    display: table;
+}
+
+.menu:after {
+    clear: both;
+}
+
+.menu {
+    *zoom: 1;
+}
+
+li.menu__mega ul.menu__second-level {
+    position: absolute;
+    top: 40px;
+    left: 25%;
+    box-sizing: border-box;
+    width: 50%;
+    padding: 15px 2%;
+    background-color: #072A24;
+    -webkit-transition: all .2s ease;
+    transition: all .2s ease;
+    margin: auto;
+}
+li.menu__mega:hover ul.menu__second-level {
+    top: 50px;
+    visibility: visible;
+    opacity: 1;
+}
+li.menu__mega ul.menu__second-level > li {
+    float: left;
+    width: 32%;
+    border: none;
+}
+li.menu__mega ul.menu__second-level > li:nth-child(3n+2) {
+    margin: 0 2%;
+}
+
+li.menu__mega ul.menu__third-level {
+    position: absolute;
+    top: 40px;
+    left: 25%;
+    box-sizing: border-box;
+    width: 50%;
+    padding: 15px 2%;
+    background-color: #072A24;
+    -webkit-transition: all .2s ease;
+    transition: all .2s ease;
+    margin: auto;
+}
+li.menu__mega:hover ul.menu__third-level {
+    top: 50px;
+    visibility: visible;
+    opacity: 1;
+}
+li.menu__mega ul.menu__third-level > li {
+    float: left;
+    width: 32%;
+    border: none;
+}
+li.menu__mega ul.menu__third-level > li:nth-child(3n+2) {
+    margin: 0 2%;
+}
+
+
+/** メニュー終了 **/
+
+img.slide {
+  width: 100%;
+  height: 100%;
+}
